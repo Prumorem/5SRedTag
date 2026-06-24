@@ -8,6 +8,7 @@ let imageOverlay = null;
 let filterStatus = 'All';
 let filterZone = 'All';
 
+
 const zonesByFactory = {
     "1st Floor": [
         "QC incoming",
@@ -105,6 +106,8 @@ function updateFilterZoneOptions() {
 document.addEventListener('DOMContentLoaded', () => {
     lucide.createIcons();
 
+    setupZoneSearch();
+
     // Set initial factory dropdown value
     const factorySelect = document.getElementById('factorySelect');
     if (factorySelect) {
@@ -126,6 +129,48 @@ document.addEventListener('DOMContentLoaded', () => {
     initMap();
     bindEvents();
 });
+
+function setupZoneSearch() {
+    const input = document.getElementById('zoneSearch');
+    const hidden = document.getElementById('zone');
+    const box = document.getElementById('zoneSuggestions');
+
+    if (!input || !hidden || !box) return;
+
+    function showSuggestions(keyword = '') {
+        const q = keyword.toLowerCase().trim();
+        const sourceZones = zonesByFactory[currentFactory] || [];
+        const matched = sourceZones.filter(z => z.toLowerCase().includes(q));
+
+        box.innerHTML = '';
+
+        matched.forEach(zone => {
+            const item = document.createElement('div');
+            item.textContent = zone;
+            item.className = 'px-3 py-2 hover:bg-gray-100 cursor-pointer';
+            item.addEventListener('click', () => {
+                input.value = zone;
+                hidden.value = zone;
+                box.classList.add('hidden');
+            });
+            box.appendChild(item);
+        });
+
+        box.classList.toggle('hidden', matched.length === 0);
+    }
+
+    input.addEventListener('focus', () => showSuggestions(input.value));
+    input.addEventListener('input', () => {
+        hidden.value = '';
+        showSuggestions(input.value);
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!input.contains(e.target) && !box.contains(e.target)) {
+            box.classList.add('hidden');
+        }
+    });
+}
 
 async function loadData() {
     try {
@@ -722,6 +767,9 @@ function handleAddTagClick(latlng) {
     // Get last selected zone from localStorage
     const lastZone = localStorage.getItem('lastSelectedZone') || '';
 
+    document.getElementById('zone').value = '';
+    document.getElementById('zoneSearch').value = '';
+
     openModal({
         id: Date.now(),
         x: latlng.lat,
@@ -766,6 +814,7 @@ function openModal(tagData = null) {
 
         // Zone logic: use tag data, or last selected if new (handled in handleAddTagClick), or empty
         document.getElementById('zone').value = tagData.zone || '';
+        document.getElementById('zoneSearch').value = tagData.zone || '';
 
         // Update required indicators
         const isClosed = (tagData.status || 'Open') === 'Closed';

@@ -32,8 +32,7 @@ if (file_exists($factoryDir)) {
     <!--  Last updated : 25 May-2026-->
     <!-- Favicon -->
      <!-- Tom Select -->
-    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+
     
     <link rel="icon"
         href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23DC2626%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z%22/><path d=%22M7 7h.01%22/></svg>">
@@ -80,10 +79,11 @@ if (file_exists($factoryDir)) {
         }
 
         #toggleSidebarBtn {
-            position: absolute;
-            top: 12px;
-            left: 12px;
-            z-index: 1001;
+            position: fixed;
+            bottom: 20px;
+            top: auto;
+            left: 20px;
+            z-index: 20000;
             background: #374151;
             border: 1px solid #1f2937;
             border-radius: 6px;
@@ -146,7 +146,7 @@ if (file_exists($factoryDir)) {
                 Developed by Kridsada MT5252
             </p>
             <span style="position:absolute; right:16px; bottom:18px; font-size:9px; color:#fecaca; opacity:0.9;">
-                Ver. 2.0.0
+                Ver. 2.1.0
             </span>
             
         </div>
@@ -301,57 +301,15 @@ if (file_exists($factoryDir)) {
                     <label class="block text-sm font-medium text-gray-700 mb-1">
                         Zone <span class="text-red-500">*</span>
                     </label>
-                <select id="zone" required
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500">
+                <input type="text" id="zoneSearch"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                    placeholder="Search Zone..." autocomplete="off">
 
-                    <option value="" selected disabled>Select Zone</option>
+                <input type="hidden" id="zone" required>
 
-                    <option value="QC incoming">QC incoming</option>
-                    <option value="SA OQC">SA OQC</option>
-                    <option value="3M08 OQC">3M08 OQC</option>
-                    <option value="3M08 + SA9">3M08 + SA9</option>
-                    <option value="SA4-SA8">SA4-SA8</option>
-                    <option value="SA1 - SA3">SA1 - SA3</option>
-                    <option value="Molding+Tapping">Molding+Tapping</option>
-                    <option value="Mini hub SA">Mini hub SA</option>
-                    <option value="Cleaning box & Tray keeping">Cleaning box & Tray keeping</option>
-                    <option value="Offline">Offline</option>
-                    <option value="SA Maintenance">SA Maintenance</option>
-                    <option value="SA Maintenance Cleaning Nozzle Area">SA Maintenance Cleaning Nozzle Area</option>
-                    <option value="SA Maintenance Mold Area">SA Maintenance Mold Area</option>
-                    <option value="TX Recieving area (West side)">TX Recieving area (West side)</option>
-                    <option value="RX Recieving area (North side)">RX Recieving area (North side)</option>
-                    <option value="Transfer area ,Forklift charger ,Jig/Tools cabinet">Transfer area ,Forklift charger ,Jig/Tools cabinet</option>
-                    <option value="Chemical room">Chemical room</option>
-                    <option value="Outside lockers,reception room,in front of the reception room,restroom and the stair on the west side,Walkway">Outside lockers,reception room,in front of the reception room,restroom and the stair on the west side,Walkway</option>
-                    <option value="Staff zone 1st floor,Meeting room 1,Storage room under the stairs,Restroom on the east side,Relax room 1st floor">Staff zone 1st floor,Meeting room 1,Storage room under the stairs,Restroom on the east side,Relax room 1st floor</option>
-                    <option value="Spare part room">Spare part room</option>
-                    <option value="Workshop room">Workshop room</option>
-                    <option value="Set up room">Set up room</option>
-                    <option value="TX-OQC">TX-OQC</option>
-                    <option value="Relax zone font 2nd floor">Relax zone font 2nd floor</option>
-                    <option value="Relax zone near staff room 2nd floor">Relax zone near staff room 2nd floor</option>
-                    <option value="Meeting room (All)">Meeting room (All)</option>
-                    <option value="Toilet 2nd floor">Toilet 2nd floor</option>
-                    <option value="Training&CFT Area">Training&CFT Area</option>
-                    <option value="Staff Area">Staff Area</option>
-                    <option value="SA517-SA-X27">SA517-SA-X27</option>
-                    <option value="SA3D11CT-1, SA3D11C-2">SA3D11CT-1, SA3D11C-2</option>
-                    <option value="Mini hub TX">Mini hub TX</option>
-                    <option value="Nidec&Marelli">Nidec&Marelli</option>
-                    <option value="Tokairika&Marelli">Tokairika&Marelli</option>
-                    <option value="Hella&NPP">Hella&NPP</option>
-                    <option value="Global-B">Global-B</option>
-                    <option value="Analysis Area (Shelf+Cart Zone)">Analysis Area (Shelf+Cart Zone)</option>
-                    <option value="Analysis Area (Inspection area)">Analysis Area (Inspection area)</option>
-                    <option value="Analysis Area (Electrical analysis)">Analysis Area (Electrical analysis)</option>
-                    <option value="JCS Area">JCS Area</option>
-                    <option value="Shutter room">Shutter room</option>
-                    <option value="Storage room">Storage room</option>
-                    <option value="Electrical room">Electrical room</option>
-                    <option value="TX Maintenance">TX Maintenance</option>
-
-                </select>
+                <div id="zoneSuggestions"
+                    class="hidden border border-gray-300 rounded-md bg-white max-h-48 overflow-y-auto text-sm mt-1 z-[10001]">
+                </div>
                 </div>
 
                 <!-- Production Line -->
@@ -672,19 +630,7 @@ if (file_exists($factoryDir)) {
             });
         })();
     </script>
-    <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        new TomSelect('#zone', {
-            create: false,
-            allowEmptyOption: true,
-            placeholder: 'Select Zone',
-            sortField: {
-                field: 'text',
-                direction: 'asc'
-            }
-        });
-    });
-</script>
+    
 </body>
 
 </html>

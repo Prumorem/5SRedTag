@@ -1,0 +1,27 @@
+﻿id,x,y,productionLine,description,solution,status,image,imageAfter,zone,createdAt,is_deleted,updatedAt,pic,category,factory
+1,996.143206,728.4603797,"Pre-treatment 3",อุปกรณ์ไม่รู้ในกรอบและไปกรีดขวางถังดับเพลิง,จัดเก็บอุปกรณ์ให้อยู่ในกรอบและไม่กีดขวางถังดับเพลิง,Closed,http://172.16.76.228:6500/5sRedtag/uploads/6a0a88f367d8e.jpg,http://172.16.76.228:6500/5SRedTag/uploads/6a144e5db0328.jpg,1,"5/18/2026 10:36",1,"15/6/2026 11:01","Woranet,Tanawat MT5652","Seiton (สะดวก)","1st Floor"
+2,1049.216114,608.1642901,,"1. มีผ้าหัว,กลาง,ท้ายไลน์ไม่มีพื้นที่จัดเก็บ
+2.ป้ายสถานะการทำงานสีแดงหลุดไม่ทำการแก้ไข
+3. มีคันโยกวาวล์วางวางไว้ไม่ทราบที่มา
+","1. 5ส.ผ้าหัว,กลาง,ท้ายไลน์
+2.ทำการแก้ไขป้ายสถานะการทำงานสีแดง
+3.5ส.คันโยกวาล์ว",Closed,http://172.16.76.228:6500/5SRedTag/uploads/6a0a8959cdae3.jpg,http://172.16.76.228:6500/5SRedTag/uploads/6a17abef64150.png,1,"5/18/2026 10:39",1,"15/6/2026 11:01"," Surat","Seisou (สะอาด)","1st Floor"
+3,996,445,CF5," ล้อเข็นไม่มีที่จัดเก็บ
+ขณะที่น้องเบรค ตอนเที่ยง
+",มีกรอบเรียบร้อยแล้ว,Closed,http://172.16.76.228:6500/5SRedTag/uploads/6a0d4216497c2.jpg,http://172.16.76.228:6500/5SRedTag/uploads/6a167bf888240.jpg,1,"5/20/2026 12:13",1,"15/6/2026 11:01","      Production. Staff. Srisamon","Seiton (สะดวก)","1st Floor"
+4,1202.319366,942.0649814,"ชั้นวางงานNG 24CY",กล่องวาวเลยพื้อนที่จัดเก็บ,จัดเก็บ,Closed,http://172.16.76.228:6500/5SRedTag/uploads/6a13bfc6879ba.jpg,http://172.16.76.228:6500/5SRedTag/uploads/6a13bfe73b3bd.jpg,3,"5/25/2026 10:20",1,"15/6/2026 11:05",,"Seiri (สะสาง)","1st Floor"
+5,1086.324829,1105.203262,,ถุงมือวางบนพื้นที่แพ็คงาน,,Open,http://172.16.76.228:6500/5SRedTag/uploads/6a13c0a4ee204.jpg,,3,"5/25/2026 10:23",1,"15/6/2026 11:05",,"Seiri (สะสาง)","1st Floor"
+6,1058.043684,550.8439614,"Curing13 hrs",ไม่มีการถอดถอนหรือติดป้ายท่อและปลั๊กไฟที่ไม่ได้ใช้งาน,,"Need help",http://172.16.76.228:6500/5SRedTag/uploads/6a13d97d0838b.jpg,,1,"5/25/2026 12:13",1,"15/6/2026 11:01",MT5625,"Seiri (สะสาง)","1st Floor"
+7,485,621,SA,Test,,Open,http://localhost:8080/5SRedTag/uploads/6a2fbc78d9e9e.jpg,,3,"15/6/2026 10:49",1,"15/6/2026 11:05",Kridsada,"Seiri (สะสาง)","1st Floor"
+8,512,942,SA,test,,Open,http://localhost:8080/5SRedTag/uploads/6a2fbfa5cfea3.jpg,,1,"15/6/2026 11:02",1,"15/6/2026 11:05",Kridsada,"Seiri (สะสาง)","1st Floor"
+9,550,410,SA,Test,,Open,http://localhost:8080/5SRedTag/uploads/6a2fc0844e841.jpg,,1,"15/6/2026 11:06",1,"2026-06-16 04:54:22",Kridsada,"Seiri (สะสาง)","1st Floor"
+10,773.5,739.5,IQC,Test,,Open,http://localhost:8080/5SRedTag/uploads/6a30b90721123.jpg,,"QC incoming","16/6/2026 4:46",1,"2026-06-17 08:10:15",,"Seiri (สะสาง)","1st Floor"
+11,732,741.94963080977,IQC,ะำหะ,,Open,http://localhost:8080/5SRedTag/uploads/6a30bbdc1c5d9.jpg,,"QC incoming","2026-06-16 04:58:49",1,"2026-06-17 08:10:19",,"Seiri (สะสาง)","1st Floor"
+12,734,783.9509176139,IQC,ทด่ท,,Open,http://localhost:8080/5SRedTag/uploads/6a30bd9fd8e31.jpg,,"QC incoming","2026-06-16 10:06:13",1,"2026-06-17 08:10:23",,"Seiri (สะสาง)","1st Floor"
+13,644,296,SA,vsv,,Open,http://localhost:8080/5SRedTag/uploads/6a30fab2e51d6.jpg,,ik,"2026-06-16 14:27:21",1,"2026-06-17 08:10:33",,"Seiketsu (สุขลักษณะ)","1st Floor"
+14,608,1308,MT5252,โต๊ะไม่สะอาด,ทำความสะอาดโต๊ะ,Closed,http://localhost:8080/5SRedTag/uploads/6a31f2bcbaa69.jpg,http://localhost:8080/5SRedTag/uploads/6a31f2eda5531.jpg,"Staff Area","2026-06-17 08:05:37",1,"2026-06-17 08:07:22",Kridsada,"Seiri (สะสาง)","2nd Floor"
+15,556,1038,"Relax zone",การจัดเก็บเก้าอี้ไม่เป็นระเบียบ,จัดเก็บเก้าอี้ให้เป็นระเบียบ,Closed,http://localhost:8080/5SRedTag/uploads/6a3204d485b2a.jpg,http://localhost:8080/5SRedTag/uploads/6a320516c181c.jpg,"Relax zone near staff room 2nd floor","2026-06-17 09:22:39",1,"2026-06-17 15:00:34",Kridsada,"Seiton (สะดวก)","2nd Floor"
+16,636,436,MT5252,ไม่เก็บโต๊ะ,เก็บโต๊ะเข้าที่,Closed,http://localhost:8080/5SRedTag/uploads/6a334d01a4b85.jpg,http://localhost:8080/5SRedTag/uploads/6a334d4e432bb.jpg,"Staff Area","2026-06-18 08:42:57",1,"2026-06-24 15:33:17",Kridsada,"Seiri (สะสาง)","2nd Floor"
+17,439.23815917969,1012.5524911556,MT5252,ีนนนรน,,Open,http://10.51.15.98:8080/5SRedTag/uploads/6a3b5672a4a46.jpg,,"Staff Area","2026-06-24 11:01:21",1,"2026-06-24 15:32:07",,"Shitsuke (สร้างนิสัย)","2nd Floor"
+18,362.66668701172,1037.7820484285,"Big cleaning day",test,,Open,http://10.51.15.98:8080/5SRedTag/uploads/6a3b78340611f.jpg,,"JCS Area","2026-06-24 13:25:04",1,"2026-06-24 15:32:17",,"Shitsuke (สร้างนิสัย)","1st Floor"
+19,502,1582,โต๊ะพี่ปรียา,ถอดถุงมือวางไว้บนโต๊ะ,,Open,http://10.51.15.98:8080/5SRedTag/uploads/6a3b96a7e07c2.jpg,,"Staff zone 1st floor,Meeting room 1,Storage room under the stairs,Restroom on the east side,Relax room 1st floor","2026-06-24 15:35:22",0,,,"Shitsuke (สร้างนิสัย)","1st Floor"

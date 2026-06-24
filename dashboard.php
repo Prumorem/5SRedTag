@@ -979,7 +979,7 @@ usort($recent, function ($a, $b) {
             </div>
         </div>
 
-        <div class="footer">5S Red Tag &copy; Murata MT670-IT</div>
+        <div class="footer">5S Red Tag &copy; Murata MT5200</div>
     </div>
 
     <!-- All Tags JSON for JS table -->
