@@ -22,7 +22,7 @@ if (!file_exists($configDir))
 if (!file_exists($csvFile)) {
     $fp = fopen($csvFile, 'w');
     fwrite($fp, "\xEF\xBB\xBF"); // Add BOM for Excel UTF-8 support
-    fputcsv($fp, ['id', 'x', 'y', 'productionLine', 'description', 'solution', 'status', 'image', 'imageAfter', 'zone', 'createdAt', 'is_deleted', 'updatedAt', 'pic', 'category', 'factory']);
+    fputcsv($fp, ['id', 'x', 'y', 'productionLine', 'description', 'solution', 'status', 'image', 'imageAfter', 'zone', 'createdAt', 'is_deleted', 'updatedAt', 'pic', 'category', 'factory', 'inspectionType']);
     fclose($fp);
 }
 
@@ -112,7 +112,12 @@ if ($action === 'load') {
                     $factoryCol = $data[15];
                 }
 
-                $factory = $_GET['factory'] ?? 'F10-11';
+                $inspectionType = '5S';
+                if ($len >= 17) {
+                    $inspectionType = $data[16] ?: '5S';
+                }
+
+                $factory = $_GET['factory'] ?? '1st Floor';
 
                 // Only include if it's not deleted AND (it matches the requested factory OR factory is empty/legacy)
                 if ($is_deleted !== '1' && $len >= 8 && ($factoryCol === '' || $factoryCol === $factory)) {
@@ -131,7 +136,8 @@ if ($action === 'load') {
                         'updatedAt' => $updatedAt,
                         'pic' => $pic,
                         'category' => $category,
-                        'factory' => $factoryCol
+                        'factory' => $factoryCol,
+                        'inspectionType' => $inspectionType,
                     ];
                 }
             }
@@ -231,7 +237,8 @@ if ($action === 'save') {
                         date('Y-m-d H:i:s'), // updatedAt - NEW value
                         $input['pic'] ?? '', // PIC (new last col)
                         $input['category'] ?? '', // Category
-                        $input['factory'] ?? 'F10-11' // Factory
+                        $input['factory'] ?? '1st Floor', // Factory
+                        $input['inspectionType'] ?? '5S',
                     ];
                     $tags[] = $updatedRow;
                     $found = true;
@@ -323,7 +330,8 @@ if ($action === 'save') {
                     '', // updatedAt (empty on creation)
                     $input['pic'] ?? '', // PIC
                     $input['category'] ?? '', // Category
-                    $input['factory'] ?? 'F10-11' // Factory
+                    $input['factory'] ?? 'F10-11', // Factory
+                    $input['inspectionType'] ?? '5S',
                 ];
             }
 
@@ -335,12 +343,12 @@ if ($action === 'save') {
             fwrite($handle, "\xEF\xBB\xBF");
 
             // Write all back
-            fputcsv($handle, ['id', 'x', 'y', 'productionLine', 'description', 'solution', 'status', 'image', 'imageAfter', 'zone', 'createdAt', 'is_deleted', 'updatedAt', 'pic', 'category', 'factory']);
+            fputcsv($handle, ['id', 'x', 'y', 'productionLine', 'description', 'solution', 'status', 'image', 'imageAfter', 'zone', 'createdAt', 'is_deleted', 'updatedAt', 'pic', 'category', 'factory', 'inspectionType']);
             foreach ($tags as $tag) {
                 // Ensure row has 16 elements
-                if (count($tag) < 16) {
+                if (count($tag) < 18) {
                     // Should be handled by migration block above, but double check
-                    while (count($tag) < 16) {
+                    while (count($tag) < 18) {
                         $tag[] = ($tag[0] == '') ? '' : 'F10-11'; // pad with F10-11 if missing factory
                     }
                 }
@@ -493,10 +501,10 @@ if ($action === 'delete') {
             ftruncate($handle, 0);
             rewind($handle);
             fwrite($handle, "\xEF\xBB\xBF"); // Add BOM
-            fputcsv($handle, ['id', 'x', 'y', 'productionLine', 'description', 'solution', 'status', 'image', 'imageAfter', 'zone', 'createdAt', 'is_deleted', 'updatedAt', 'pic', 'category', 'factory']);
+            fputcsv($handle, ['id', 'x', 'y', 'productionLine', 'description', 'solution', 'status', 'image', 'imageAfter', 'zone', 'createdAt', 'is_deleted', 'updatedAt', 'pic', 'category', 'factory', 'inspectionType']);
             foreach ($tags as $tag) {
                 // Force to 16 cols if needed
-                while (count($tag) < 16) {
+                while (count($tag) < 18) {
                     $tag[] = 'F10-11';
                 }
                 fputcsv($handle, $tag);

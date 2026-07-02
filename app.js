@@ -7,6 +7,7 @@ let mapInstance = null;
 let imageOverlay = null;
 let filterStatus = 'All';
 let filterZone = 'All';
+let filterInspectionType = 'All';
 
 
 const zonesByFactory = {
@@ -68,15 +69,38 @@ let isMovingTag = false;
 let movingTagId = null;
 
 // Icons
-const getStatusIcon = (status) => {
-    let color = '#ef4444'; // red-500
-    if (status === 'In Progress') color = '#eab308'; // yellow-500
-    if (status === 'Closed') color = '#22c55e'; // green-500
-    if (status === 'Need help') color = '#f97316'; // orange-500
+const getStatusIcon = (status, inspectionType = '5S') => {
+    let color = '#ef4444'; // Open = red
+    if (status === 'In Progress') color = '#eab308';
+    if (status === 'Closed') color = '#22c55e';
+    if (status === 'Need help') color = '#f97316';
+
+    if (inspectionType === 'Safety') {
+        return L.divIcon({
+            className: 'custom-marker safety-marker',
+            html: `
+                <div style="
+                    color: ${color};
+                    font-size: 42px;
+                    font-weight: 900;
+                    line-height: 42px;
+                    text-align: center;
+                    text-shadow: 0 2px 4px rgba(0,0,0,0.25);
+                ">+</div>
+            `,
+            iconSize: [42, 42],
+            iconAnchor: [21, 21],
+            popupAnchor: [0, -21],
+            tooltipAnchor: [0, -21]
+        });
+    }
 
     return L.divIcon({
         className: 'custom-marker',
-        html: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${color}" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 100%; height: 100%;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3" fill="white"></circle></svg>`,
+        html: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${color}" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 100%; height: 100%;">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+            <circle cx="12" cy="10" r="3" fill="white"></circle>
+        </svg>`,
         iconSize: [32, 32],
         iconAnchor: [16, 32],
         popupAnchor: [0, -32],
@@ -102,11 +126,53 @@ function updateFilterZoneOptions() {
     filterZone = 'All';
     filterZoneSelect.value = 'All';
 }
+function updateInspectionForm() {
+    const inspectionType = document.getElementById('inspectionType').value;
+    const category = document.getElementById('category');
+    const categoryLabel = document.querySelector('#categoryGroup label');
+
+    if (!category) return;
+
+    category.innerHTML = '';
+
+    if (inspectionType === 'Safety') {
+        if (categoryLabel) {
+            categoryLabel.innerHTML = 'Category <span class="text-red-500">*</span>';
+        }
+
+        category.innerHTML = `
+            <option value="Low">Low</option>
+            <option value="Medium">Medium</option>
+            <option value="High">High</option>
+        `;
+    } else {
+        if (categoryLabel) {
+            categoryLabel.innerHTML = 'Category <span class="text-red-500">*</span>';
+        }
+
+        category.innerHTML = `
+            <option value="">Select Category</option>
+            <option value="Seiri (สะสาง)">Seiri (สะสาง)</option>
+            <option value="Seiton (สะดวก)">Seiton (สะดวก)</option>
+            <option value="Seisou (สะอาด)">Seisou (สะอาด)</option>
+            <option value="Seiketsu (สุขลักษณะ)">Seiketsu (สุขลักษณะ)</option>
+            <option value="Shitsuke (สร้างนิสัย)">Shitsuke (สร้างนิสัย)</option>
+        `;
+    }
+
+    category.required = true;
+}
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
     lucide.createIcons();
 
     setupZoneSearch();
+
+    const inspectionTypeSelect = document.getElementById('inspectionType');
+    if (inspectionTypeSelect) {
+        inspectionTypeSelect.addEventListener('change', updateInspectionForm);
+        updateInspectionForm();
+    }
 
     // Set initial factory dropdown value
     const factorySelect = document.getElementById('factorySelect');
@@ -174,7 +240,7 @@ function setupZoneSearch() {
 
 async function loadData() {
     try {
-        const response = await fetch(`api.php?action=load&factory=${currentFactory}`);
+        const response = await fetch(`api.php?action=load&factory=${encodeURIComponent(currentFactory)}`);
         const data = await response.json();
 
         tags = data.tags || [];
@@ -389,6 +455,15 @@ function bindEvents() {
         pwStep.classList.remove('hidden');
         uploadStep.classList.add('hidden');
         modal.classList.remove('hidden');
+        
+    });
+
+    document.getElementById('filterInspectionType').addEventListener('change', (e) => {
+
+        filterInspectionType = e.target.value;
+
+        renderApp();
+
     });
 
     // User Guide Logic
@@ -546,7 +621,7 @@ function renderMap() {
     const filteredTags = getFilteredTags();
     filteredTags.forEach(tag => {
         const marker = L.marker([tag.x, tag.y], {
-            icon: getStatusIcon(tag.status)
+            icon: getStatusIcon(tag.status, tag.inspectionType || '5S')
         }).addTo(mapInstance);
 
         marker.bindTooltip(`
@@ -641,23 +716,18 @@ function renderStats() {
 }
 
 function getFilteredTags() {
-    const today = new Date();
-    const tenDaysAgo = new Date(today);
-    tenDaysAgo.setDate(tenDaysAgo.getDate() - 10);
-
     return tags.filter(t => {
-        // Skip tags that are Closed AND older than 10 days
-        if (t.status === 'Closed' && t.createdAt) {
-            // Replace space with T for reliable parsing (e.g., "2023-10-15 14:30:00" -> "2023-10-15T14:30:00")
-            const createdDate = new Date(t.createdAt.replace(' ', 'T'));
-            if (!isNaN(createdDate.getTime()) && createdDate <= tenDaysAgo) {
-                return false;
-            }
-        }
+        const statusMatch =
+            filterStatus === 'All' || t.status === filterStatus;
 
-        const statusMatch = (filterStatus === 'All') || (t.status === filterStatus);
-        const zoneMatch = (filterZone === 'All') || (String(t.zone) === filterZone);
-        return statusMatch && zoneMatch;
+        const zoneMatch =
+            filterZone === 'All' || String(t.zone || '') === filterZone;
+
+        const inspectionMatch =
+            filterInspectionType === 'All' ||
+            String(t.inspectionType || '5S') === filterInspectionType;
+
+        return statusMatch && zoneMatch && inspectionMatch;
     });
 }
 
@@ -785,6 +855,7 @@ function handleAddTagClick(latlng) {
         category: '',
         factory: currentFactory
     });
+
 }
 
 function openModal(tagData = null) {
@@ -811,6 +882,9 @@ function openModal(tagData = null) {
         document.getElementById('status').value = tagData.status || 'Open';
         document.getElementById('category').value = tagData.category || '';
         document.getElementById('pic').value = tagData.pic || '';
+        document.getElementById('inspectionType').value = tagData.inspectionType || '';
+
+        updateInspectionForm();
 
         // Zone logic: use tag data, or last selected if new (handled in handleAddTagClick), or empty
         document.getElementById('zone').value = tagData.zone || '';
@@ -875,6 +949,7 @@ function handleFormSubmit(e) {
     const category = document.getElementById('category').value;
     const pic = document.getElementById('pic').value;
     const zone = document.getElementById('zone').value;
+    const inspectionType = document.getElementById('inspectionType').value;
 
     // Get image path from preview src (since upload happens on change)
     const preview = document.getElementById('imagePreview');
@@ -882,6 +957,7 @@ function handleFormSubmit(e) {
 
     const previewAfter = document.getElementById('imagePreviewAfter');
     const imageAfter = (!previewAfter.classList.contains('hidden')) ? previewAfter.src : null;
+
 
     // --- Validation Logic ---
     if (!zone) {
@@ -900,10 +976,15 @@ function handleFormSubmit(e) {
         alert('Status is required.');
         return;
     }
-    if (!category) {
-        alert('Category is required.');
-        return;
+    if (inspectionType === '5S' && !category) {
+    alert('Category is required.');
+    return;
     }
+    if (!category) {
+    alert('Category is required.');
+    return;
+}
+
 
 
     // Check for required solution and photo after if Closed
@@ -934,6 +1015,7 @@ function handleFormSubmit(e) {
         zone,
         pic,
         category,
+        inspectionType,
         factory: currentFactory
     };
 

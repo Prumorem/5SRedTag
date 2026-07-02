@@ -1,5 +1,5 @@
 ﻿<?php
-// dashboard.php โ€” 5S Red Tag Dashboard
+// dashboard.php โ€” MT5200 Patrol Dashboard
 $dataDir = 'data';
 $csvFile = $dataDir . '/tags.csv';
 
@@ -24,6 +24,7 @@ if (file_exists($csvFile) && ($handle = fopen($csvFile, 'r')) !== false) {
                 'category' => ($len >= 15) ? $row[14] : '',
                 'pic' => ($len >= 14) ? $row[13] : '',
                 'factory' => ($len >= 16) ? $row[15] : '',
+                'inspectionType' => ($len >= 17) ? $row[16] : '5S',
                 'productionLine' => $row[3],
                 'image' => $row[7],
                 'imageAfter' => ($len >= 9) ? $row[8] : '',
@@ -117,7 +118,7 @@ usort($recent, function ($a, $b) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard &mdash; 5S Red Tag</title>
+    <title>Dashboard &mdash; MT5200 Patrol</title>
     <link rel="icon"
         href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23DC2626%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22M3 3h18v18H3z%22/><path d=%22M8 12h8M12 8v8%22/></svg>">
 
@@ -701,6 +702,16 @@ usort($recent, function ($a, $b) {
             padding: .1rem .55rem;
             display: none;
         }
+        #fZone {
+            width: 220px !important;
+            min-width: 220px !important;
+            max-width: 220px !important;
+        }
+        .filter-select {
+            width: 160px;
+            min-width: 160px;
+            max-width: 160px;
+        }
     </style>
 </head>
 
@@ -715,7 +726,7 @@ usort($recent, function ($a, $b) {
                 <path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z" />
                 <path d="M7 7h.01" />
             </svg>
-            5S Red Tag
+            MT5200 Patrol
             <span class="badge">Dashboard</span>
         </a>
         <div class="topnav-spacer"></div>
@@ -743,7 +754,7 @@ usort($recent, function ($a, $b) {
     <div class="page">
 
         <div class="page-title">Monitoring Dashboard</div>
-        <div class="page-sub">Summary of all active 5S Red Tags &nbsp;-&nbsp; <?php echo date('d M Y, H:i'); ?></div>
+        <div class="page-sub">Summary of all active MT5200 Patrol &nbsp;-&nbsp; <?php echo date('d M Y, H:i'); ?></div>
 
         <!-- ===== GLOBAL FILTER BAR ===== -->
         <div class="filter-bar" id="filterBar">
@@ -771,10 +782,20 @@ usort($recent, function ($a, $b) {
                 <option>Need help</option>
                 <option>Closed</option>
             </select>
+            <label>Inspection Type</label>
+            <select class="filter-select" id="fInspectionType">
+                <option value="">All Types</option>
+                <option value="5S">5S</option>
+                <option value="Safety">Safety</option>
+            </select>
             <label>Category</label>
             <select class="filter-select" id="fCategory">
                 <option value="">All Categories</option>
             </select>
+            
+            <!-- ขึ้นบรรทัดใหม่ -->
+            <div style="flex-basis:100%; height:0;"></div>
+
             <label>Created</label>
             <select class="filter-select" id="fCreated">
                 <option value="">All Months</option>
@@ -979,7 +1000,7 @@ usort($recent, function ($a, $b) {
             </div>
         </div>
 
-        <div class="footer">5S Red Tag &copy; Murata MT5200</div>
+        <div class="footer">MT5200 Patrol &copy; Murata MT5200</div>
     </div>
 
     <!-- All Tags JSON for JS table -->
@@ -1369,34 +1390,30 @@ usort($recent, function ($a, $b) {
         // ======= GLOBAL FILTER ENGINE =======
         (function () {
 
-            // ---- Populate Zone dropdown with raw-number values ----
-            (function () {
-                const zones = [...new Set(ALL_TAGS.map(t => t.zone).filter(Boolean))].sort((a, b) => Number(a) - Number(b));
-                const sel = document.getElementById('fZone');
-                if (!sel) return;
-                zones.forEach(z => {
+            // ---- Populate Category dropdown ----
+            function updateCategoryDropdown() {
+
+                const inspection = document.getElementById('fInspectionType').value;
+                const sel = document.getElementById('fCategory');
+
+                sel.innerHTML = '<option value="">All Categories</option>';
+
+                const cats = [...new Set(
+                    ALL_TAGS
+                        .filter(t => {
+                            if (!inspection) return true;
+                            return (t.inspectionType || '5S') === inspection;
+                        })
+                        .map(t => t.category || 'Uncategorised')
+                )].sort();
+
+                cats.forEach(c => {
                     const o = document.createElement('option');
-                    o.value = String(z);          // value = '1', '2', โ€ฆ
-                    o.text = 'Zone ' + z;        // display = 'Zone 1', โ€ฆ
+                    o.value = c;
+                    o.text = c;
                     sel.appendChild(o);
                 });
-            })();
-
-            // ---- Populate Category dropdown ----
-            (function () {
-                const cats = [...new Set(ALL_TAGS.map(t => t.category || 'Uncategorised').filter(Boolean))].sort();
-                const sel = document.getElementById('fCategory');
-                if (!sel) return;
-                // only add if not already present (avoid duplicating hardcoded options)
-                const existing = [...sel.options].map(o => o.value);
-                cats.forEach(c => {
-                    if (!existing.includes(c)) {
-                        const o = document.createElement('option');
-                        o.value = o.text = c;
-                        sel.appendChild(o);
-                    }
-                });
-            })();
+            }
 
             // ---- Populate Created (mmm-yy) dropdown in chronological order ----
             const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -1538,20 +1555,22 @@ usort($recent, function ($a, $b) {
                 const factory = get('fFactory');
                 const zone = get('fZone');
                 const status = get('fStatus');
+                const inspectionType = get('fInspectionType');
                 const cat = get('fCategory');
                 const created = get('fCreated');
 
                 const filtered = ALL_TAGS.filter(t => {
-                    const tFac = t.factory || 'F10-11'; // Fallback to F10-11 if missing
+                    const tFac = t.factory || '';
                     if (factory && tFac !== factory) return false;
                     if (zone && String(t.zone || '') !== zone) return false;
                     if (status && t.status !== status) return false;
+                    if (inspectionType && (t.inspectionType || '5S') !== inspectionType)return false;
                     if (cat && (t.category || 'Uncategorised') !== cat) return false;
                     if (created && toMmmYy(t.createdAt) !== created) return false;
                     return true;
                 });
 
-                const activeCount = [factory, zone, status, cat, created].filter(Boolean).length;
+                const activeCount = [factory, zone, status, inspectionType, cat, created].filter(Boolean).length;
                 const badge = document.getElementById('filterCount');
                 if (badge) {
                     badge.textContent = activeCount + ' filter' + (activeCount !== 1 ? 's' : '') + ' active';
@@ -1567,14 +1586,29 @@ usort($recent, function ($a, $b) {
             window.applyGlobalFilters = applyGlobalFilters;
 
             // Wire all filter controls
-            ['fFactory', 'fZone', 'fStatus', 'fCategory', 'fCreated'].forEach(id => {
+            [
+              'fFactory',
+              'fZone',
+              'fStatus',
+              'fCategory',
+              'fCreated'
+            ].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.addEventListener('change', applyGlobalFilters);
             });
 
+            const inspectionSelect = document.getElementById('fInspectionType');
+            if (inspectionSelect) {
+                inspectionSelect.addEventListener('change', () => {
+                    updateCategoryDropdown();
+                    document.getElementById('fCategory').value = '';
+                    applyGlobalFilters();
+                });
+            }
+
             const resetBtn = document.getElementById('filterReset');
             if (resetBtn) resetBtn.addEventListener('click', () => {
-                ['fFactory', 'fZone', 'fStatus', 'fCategory', 'fCreated'].forEach(id => {
+                ['fFactory', 'fZone', 'fStatus', 'fInspectionType', 'fCategory', 'fCreated'].forEach(id => {
                     const el = document.getElementById(id); if (el) el.value = '';
                 });
                 window.ALL_TAGS_FILTERED = null;

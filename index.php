@@ -27,7 +27,7 @@ if (file_exists($factoryDir)) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Red Tag 5S</title>
+    <title>MT5200 Patrol</title>
     <!--  Dev by : MT5653-DX Team / Naphatsawan Ankard -->
     <!--  Last updated : 25 May-2026-->
     <!-- Favicon -->
@@ -64,10 +64,9 @@ if (file_exists($factoryDir)) {
 
         /* Collapsible Sidebar */
         #sidebar {
+            width: 20rem;
             min-width: 20rem;
-            /* w-80 */
-            max-width: 24rem;
-            /* md:w-96 */
+            max-width: 20rem;
             overflow: hidden;
             transition: min-width 0.3s ease, max-width 0.3s ease;
             flex-shrink: 0;
@@ -119,10 +118,16 @@ if (file_exists($factoryDir)) {
             width: 190px !important;
             max-width: 190px !important;
         }
+
+        #tagList {
+            width: 100%;
+            max-width: 100%;
+        }
     </style>
 </head>
 
-<body class="bg-gray-50 flex h-screen w-screen overflow-hidden">
+<body class="bg-gray-50 overflow-hidden">
+    <div class="flex h-screen w-screen">
 
     <!-- Sidebar -->
     <div id="sidebar" class="bg-white shadow-lg flex flex-col z-10 h-full border-r border-gray-200">
@@ -131,7 +136,7 @@ if (file_exists($factoryDir)) {
             <div class="flex items-center justify-between gap-2 mb-2">
                 <h1 class="text-xl font-bold flex items-center gap-2">
                     <i data-lucide="layout"></i>
-                    5S Red Tag
+                    MT5200 Patrol
                 </h1>
                 <a href="dashboard.php" title="Open Dashboard"
                     style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:6px;background:rgba(255,255,255,0.15);color:#fff;font-size:0.78rem;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.25);white-space:nowrap;transition:background .2s;"
@@ -146,7 +151,7 @@ if (file_exists($factoryDir)) {
                 Developed by Kridsada MT5252
             </p>
             <span style="position:absolute; right:16px; bottom:18px; font-size:9px; color:#fecaca; opacity:0.9;">
-                Ver. 2.1.0
+                Ver. 3.0.0
             </span>
             
         </div>
@@ -187,77 +192,59 @@ if (file_exists($factoryDir)) {
                     <option value="2nd Floor" selected>2nd Floor</option>
                 </select>
             </div>
-            <div class="flex gap-2">
-                <select id="filterSelect" class="flex-1 text-xs border border-gray-300 rounded px-1 py-0.5 bg-white">
-                    <option value="All">All Status</option>
-                    <option value="Open">Open</option>
-                    <option value="In Progress">In Progress</option>
-                    <option value="Need help">Need help</option>
-                    <option value="Closed">Closed</option>
-                </select>
-                <select id="filterZone" class="w-[190px] max-w-[190px] shrink-0 text-xs border border-gray-300 rounded px-1 py-0.5 bg-white overflow-hidden text-ellipsis whitespace-nowrap">
-                    <option value="All">All Zones</option>
-                    <option value="QC incoming">QC incoming</option>
-                    <option value="SA OQC">SA OQC</option>
-                    <option value="3M08 OQC">3M08 OQC</option>
-                    <option value="3M08 + SA9">3M08 + SA9</option>
-                    <option value="SA4-SA8">SA4-SA8</option>
-                    <option value="SA1 - SA3">SA1 - SA3</option>
-                    <option value="Molding+Tapping">Molding+Tapping</option>
-                    <option value="Mini hub SA">Mini hub SA</option>
-                    <option value="Cleaning box & Tray keeping">Cleaning box & Tray keeping</option>
-                    <option value="Offline">Offline</option>
-                    <option value="SA Maintenance">SA Maintenance</option>
-                    <option value="SA Maintenance Cleaning Nozzle Area">SA Maintenance Cleaning Nozzle Area</option>
-                    <option value="SA Maintenance Mold Area">SA Maintenance Mold Area</option>
-                    <option value="TX Recieving area (West side)">TX Recieving area (West side)</option>
-                    <option value="RX Recieving area (North side)">RX Recieving area (North side)</option>
-                    <option value="Transfer area ,Forklift charger ,Jig/Tools cabinet">Transfer area ,Forklift charger ,Jig/Tools cabinet</option>
-                    <option value="Change boxes ,FG and Storage area (out of shelf) P-Q-R">Change boxes ,FG and Storage area (out of shelf) P-Q-R</option>
-                    <option value="FG and Storage J-K-L-M-N-O">FG and Storage J-K-L-M-N-O</option>
-                    <option value="Storage shelf E-F-G-H">Storage shelf E-F-G-H</option>
-                    <option value="Storage shelf A-B-C-D-I">Storage shelf A-B-C-D-I</option>
-                    <option value="Refrigerator">Refrigerator</option>
-                    <option value="Chemical room">Chemical room</option>
-                    <option value="Outside lockers,reception room,in front of the reception room,restroom and the stair on the west side,Walkway">Outside lockers,reception room,in front of the reception room,restroom and the stair on the west side,Walkway</option>
-                    <option value="Staff zone 1st floor,Meeting room 1,Storage room under the stairs,Restroom on the east side,Relax room 1st floor">Staff zone 1st floor,Meeting room 1,Storage room under the stairs,Restroom on the east side,Relax room 1st floor</option>
-                    <option value="Spare part room">Spare part room</option>
-                    <option value="Workshop room">Workshop room</option>
-                    <option value="Set up room">Set up room</option>
-                    <option value="TX-OQC">TX-OQC</option>
-                    <option value="Relax zone font 2nd floor">Relax zone font 2nd floor</option>
-                    <option value="Relax zone near staff room 2nd floor">Relax zone near staff room 2nd floor</option>
-                    <option value="Meeting room (All)">Meeting room (All)</option>
-                    <option value="Toilet 2nd floor">Toilet </option>
-                    <option value="Training&CFT Area">Training&CFT Area</option>
-                    <option value="Staff Area">Staff Area</option>
-                    <option value="SA517-SA-X27">SA517-SA-X27</option>
-                    <option value="SA3D11CT-1, SA3D11C-2">SA3D11CT-1, SA3D11C-2</option>
-                    <option value="Mini hub TX">Mini hub TX</option>
-                    <option value="Nidec&Marelli">Nidec&Marelli</option>
-                    <option value="Tokairika&Marelli">Tokairika&Marelli</option>
-                    <option value="Hella&NPP">Hella&NPP</option>
-                    <option value="Global-B">Global-B</option>
-                    <option value="Analysis Area (Shelf+Cart Zone)">Analysis Area (Shelf+Cart Zone)</option>
-                    <option value="Analysis Area (Inspection area)">Analysis Area (Inspection area)</option>
-                    <option value="Analysis Area (Electrical analysis)">Analysis Area (Electrical analysis)</option>
-                    <option value="JCS Area">JCS Area</option>
-                    <option value="Shutter room">Shutter room</option>
-                    <option value="Storage room">Storage room</option>
-                    <option value="Electrical room">Electrical room</option>
-                    <option value="TX Maintenance">TX Maintenance</option>
-                </select>
+            
+            <div class="space-y-2 mt-2">
+
+                <!-- Status -->
+                <div>
+                    <label class="block text-[10px] font-semibold text-gray-500 mb-1 uppercase">
+                        Status
+                    </label>
+                    <select id="filterSelect"
+                        class="w-full text-xs border border-gray-300 rounded px-2 py-1 bg-white">
+                        <option value="All">All Status</option>
+                        <option value="Open">Open</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Need help">Need help</option>
+                        <option value="Closed">Closed</option>
+                    </select>
+                </div>
+
+                <!-- Inspection Type -->
+                <div>
+                    <label class="block text-[10px] font-semibold text-gray-500 mb-1 uppercase">
+                        Inspection Type
+                    </label>
+                    <select id="filterInspectionType"
+                         class="w-full text-xs border border-gray-300 rounded px-2 py-1 bg-white">
+                         <option value="All">All Type</option>
+                         <option value="5S">5S</option>
+                         <option value="Safety">Safety</option>
+                    </select>
+                </div>
+
+                <!-- Zone -->
+                <div>
+                    <label class="block text-[10px] font-semibold text-gray-500 mb-1 uppercase">
+                        Zone
+                    </label>
+                    <select id="filterZone"
+                        class="w-full text-xs border border-gray-300 rounded px-2 py-1 bg-white">
+                        <option value="All">All Zones</option>
+                    </select>
+                </div>
+
             </div>
-        </div>
+            </div>
 
         <!-- Tag List -->
-        <div id="tagList" class="flex-1 overflow-y-auto p-4 space-y-3">
+        <div id="tagList" class="flex-1 overflow-y-auto p-4 space-y-3 w-full max-w-full">
             <!-- List items will be injected here -->
         </div>
     </div>
 
     <!-- Main Map Area -->
-    <div class="flex-1 relative h-full bg-gray-100">
+    <div class="flex-1 relative h-full bg-gray-100 overflow-hidden">
         <!-- Sidebar Toggle Button -->
         <button id="toggleSidebarBtn" title="Toggle Sidebar">&#9776;</button>
 
@@ -266,7 +253,7 @@ if (file_exists($factoryDir)) {
             class="absolute top-4 z-[1000] bg-white/95 backdrop-blur-sm px-6 py-2.5 rounded-full shadow-md border border-gray-200 pointer-events-none flex items-center gap-2 transition-all opacity-90">
             <i data-lucide="tags" class="text-red-600 w-5 h-5"></i>
             <h2 class="text-gray-800 font-bold text-lg tracking-tight select-none">
-                5S Red Tag <span class="text-gray-300 mx-2 font-light">|</span> <span
+                MT5200 Patrol <span class="text-gray-300 mx-2 font-light">|</span> <span
                     class="text-gray-600 font-medium text-base">Floor Map</span>
             </h2>
         </div>
@@ -283,18 +270,31 @@ if (file_exists($factoryDir)) {
 
     <!-- Modal Form -->
     <div id="tagModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-4 hidden">
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center p-4 border-b">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] flex flex-col">
+            <div class="sticky top-0 z-20 flex justify-between items-center p-4 border-b bg-white">
                 <h2 id="modalTitle" class="text-xl font-bold text-gray-800">New Red Tag</h2>
                 <button id="closeModalBtn" class="text-gray-500 hover:text-gray-700">
                     <i data-lucide="x"></i>
                 </button>
             </div>
 
-            <form id="tagForm" class="p-4 space-y-4">
+            <form id="tagForm" class="flex-1 overflow-y-auto p-4 space-y-4">
                 <input type="hidden" id="tagId">
                 <input type="hidden" id="tagX">
                 <input type="hidden" id="tagY">
+
+                <!-- Inspection Type -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        Inspection Type <span class="text-red-500">*</span>
+                    </label>
+                    <select id="inspectionType" required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500">
+                        
+                        <option value="5S">5S</option>
+                        <option value="Safety">Safety</option>
+                    </select>
+                </div>
 
                 <!-- Zone -->
                 <div>
@@ -362,7 +362,7 @@ if (file_exists($factoryDir)) {
                 </div>
 
                 <!-- Category Field -->
-                <div>
+                <div id="categoryGroup">
                     <label class="block text-sm font-medium text-gray-700 mb-1">
                         Category <span class="text-red-500">*</span>
                     </label>
@@ -630,7 +630,7 @@ if (file_exists($factoryDir)) {
             });
         })();
     </script>
-    
+</div>    
 </body>
 
 </html>
