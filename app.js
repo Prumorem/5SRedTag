@@ -598,7 +598,7 @@ function bindEvents() {
     document.getElementById('moveBtn').addEventListener('click', handleMoveBtnClick);
     document.getElementById('exportBtn').addEventListener('click', () => {
         // Direct download from server
-        window.open('data/tags.csv', '_blank');
+        window.open('api_sqlite.php?action=export', '_blank');
     });
     document.getElementById('filterSelect').addEventListener('change', (e) => {
         filterStatus = e.target.value;

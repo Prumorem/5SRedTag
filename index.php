@@ -149,7 +149,7 @@ if (file_exists($factoryDir)) {
                 Developed by Kridsada MT5252
             </p>
             <span style="position:absolute; right:16px; bottom:18px; font-size:9px; color:#fecaca; opacity:0.9;">
-                Ver. 3.0.0
+                Ver. 3.0.1
             </span>
             
         </div>
@@ -564,7 +564,7 @@ if (file_exists($factoryDir)) {
                         <div class="space-y-1">
                             <h4 class="font-semibold text-gray-700">2. Update / Close a Tag ✏️</h4>
                             <ul class="list-disc list-inside text-sm text-gray-600 pl-2">
-                                <li>Click pin -> Update details -> Save.</li>
+                                <li>Click pin or List tag -> Update details -> Save.</li>
                                 <li><strong>To Close:</strong> Status "Closed" requires Solution & Photo (After).</li>
                             </ul>
                         </div>
@@ -584,8 +584,8 @@ if (file_exists($factoryDir)) {
                         <div class="space-y-1">
                             <h4 class="font-semibold text-gray-700">5. Toggle Sidebar ☰</h4>
                             <ul class="list-disc list-inside text-sm text-gray-600 pl-2">
-                                <li>กดปุ่ม <strong>☰</strong> มุมซ้ายบนของแผนที่ เพื่อซ่อน/แสดง sidebar</li>
-                                <li>บน tablet แนวตั้ง sidebar จะพับอัตโนมัติเพื่อเพิ่มพื้นที่แผนที่</li>
+                                <li>กดปุ่ม <strong>☰</strong> มุมซ้ายล่าง เพื่อซ่อน/แสดง sidebar</li>
+                                <li>บน tablet หรือ มือถือ แนวตั้ง sidebar จะพับอัตโนมัติเพื่อเพิ่มพื้นที่แผนที่</li>
                                 <li>ปุ่ม <strong>+/−</strong> ย่อ-ขยาย อยู่มุมขวาบนของแผนที่</li>
                             </ul>
                         </div>
@@ -635,7 +635,7 @@ if (file_exists($factoryDir)) {
     <script src="libs/leaflet/leaflet.js" defer></script>
 
     <!-- App Logic -->
-    <script src="app.js?v=upload002" defer></script>
+    <script src="app.js?v=export002" defer></script>
     <script defer>
         window.addEventListener('load', function () {
             if (typeof window.APP_VERSION === 'undefined' || window.APP_VERSION !== '2.0.0') {
