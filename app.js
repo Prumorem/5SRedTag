@@ -145,7 +145,7 @@ function initMonthYearFilter() {
         'September', 'October', 'November', 'December'
     ];
 
-    monthSelect.innerHTML = '';
+    monthSelect.innerHTML = '<option value="">All Month</option>';
 
     monthNames.forEach((name, index) => {
         const monthNumber = index + 1;
@@ -161,7 +161,7 @@ function initMonthYearFilter() {
         monthSelect.appendChild(option);
     });
 
-    yearSelect.innerHTML = '';
+    yearSelect.innerHTML = '<option value="">All Year</option>';
 
     for (let year = currentYear - 3; year <= currentYear + 1; year++) {
         const option = document.createElement('option');
