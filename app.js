@@ -8,6 +8,9 @@ let imageOverlay = null;
 let filterStatus = 'All';
 let filterZone = 'All';
 let filterInspectionType = 'All';
+let filterMonth = '';
+let filterYear = '';
+
 
 
 const zonesByFactory = {
@@ -126,6 +129,56 @@ function updateFilterZoneOptions() {
     filterZone = 'All';
     filterZoneSelect.value = 'All';
 }
+function initMonthYearFilter() {
+    const monthSelect = document.getElementById('filterMonth');
+    const yearSelect = document.getElementById('filterYear');
+
+    if (!monthSelect || !yearSelect) return;
+
+    const today = new Date();
+    const currentMonth = today.getMonth() + 1;
+    const currentYear = today.getFullYear();
+
+    const monthNames = [
+        'January', 'February', 'March', 'April',
+        'May', 'June', 'July', 'August',
+        'September', 'October', 'November', 'December'
+    ];
+
+    monthSelect.innerHTML = '';
+
+    monthNames.forEach((name, index) => {
+        const monthNumber = index + 1;
+        const option = document.createElement('option');
+
+        option.value = monthNumber;
+        option.textContent = name;
+
+        if (monthNumber === currentMonth) {
+            option.selected = true;
+        }
+
+        monthSelect.appendChild(option);
+    });
+
+    yearSelect.innerHTML = '';
+
+    for (let year = currentYear - 3; year <= currentYear + 1; year++) {
+        const option = document.createElement('option');
+
+        option.value = year;
+        option.textContent = year;
+
+        if (year === currentYear) {
+            option.selected = true;
+        }
+
+        yearSelect.appendChild(option);
+    }
+
+    filterMonth = currentMonth;
+    filterYear = currentYear;
+}
 function updateInspectionForm() {
     const inspectionType = document.getElementById('inspectionType').value;
     const category = document.getElementById('category');
@@ -190,6 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     updateFilterZoneOptions();
+    initMonthYearFilter();
 
     loadData();
     initMap();
@@ -240,7 +294,7 @@ function setupZoneSearch() {
 
 async function loadData() {
     try {
-        const response = await fetch(`api.php?action=load&factory=${encodeURIComponent(currentFactory)}`);
+        const response = await fetch(`api_sqlite.php?action=load&factory=${encodeURIComponent(currentFactory)}`);
         const data = await response.json();
 
         tags = data.tags || [];
@@ -255,7 +309,7 @@ async function loadData() {
 
 async function saveData(tagData) {
     try {
-        const response = await fetch('api.php?action=save', {
+        const response = await fetch('api_sqlite.php?action=save', {
             method: 'POST',
             body: JSON.stringify(tagData)
         });
@@ -282,7 +336,7 @@ async function saveData(tagData) {
 
 async function saveMap(base64Data) {
     try {
-        await fetch('api.php?action=save_map', {
+        await fetch('api_sqlite.php?action=save_map', {
             method: 'POST',
             body: JSON.stringify({ map: base64Data })
         });
@@ -301,7 +355,7 @@ async function deleteTag(id) {
 
 async function performDelete(id) {
     try {
-        await fetch('api.php?action=delete', {
+        await fetch('api_sqlite.php?action=delete', {
             method: 'POST',
             body: JSON.stringify({ id })
         });
@@ -554,6 +608,21 @@ function bindEvents() {
         filterZone = e.target.value;
         renderApp();
     });
+    const filterMonthSelect = document.getElementById('filterMonth');
+    if (filterMonthSelect) {
+        filterMonthSelect.addEventListener('change', (e) => {
+            filterMonth = Number(e.target.value);
+            renderApp();
+        });
+    }
+
+    const filterYearSelect = document.getElementById('filterYear');
+    if (filterYearSelect) {
+        filterYearSelect.addEventListener('change', (e) => {
+            filterYear = Number(e.target.value);
+            renderApp();
+        });
+    }
 
     // Status Change in Form
     document.getElementById('status').addEventListener('change', (e) => {
@@ -562,14 +631,13 @@ function bindEvents() {
         const photoAfterRequired = document.getElementById('photoAfterRequired');
 
         if (isClosed) {
-            solutionRequired.classList.remove('hidden');
-            photoAfterRequired.classList.remove('hidden');
+            if (solutionRequired) solutionRequired.classList.remove('hidden');
+            if (photoAfterRequired) photoAfterRequired.classList.remove('hidden');
         } else {
-            solutionRequired.classList.add('hidden');
-            photoAfterRequired.classList.add('hidden');
+            if (solutionRequired) solutionRequired.classList.add('hidden');
+            if (photoAfterRequired) photoAfterRequired.classList.add('hidden');
         }
     });
-
     const tagForm = document.getElementById('tagForm');
     if (tagForm) tagForm.addEventListener('submit', handleFormSubmit);
 
@@ -579,12 +647,86 @@ function bindEvents() {
     const closeModalBtn = document.getElementById('closeModalBtn');
     if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
 
-    const tagImageInput = document.getElementById('tagImageInput');
-    if (tagImageInput) tagImageInput.addEventListener('change', handleTagImageUpload);
 
-    const tagImageInputAfter = document.getElementById('tagImageInputAfter');
-    if (tagImageInputAfter) tagImageInputAfter.addEventListener('change', handleTagImageAfterUpload);
+
+    
+    const takePhotoBtn = document.getElementById('takePhotoBtn');
+    const chooseGalleryBtn = document.getElementById('chooseGalleryBtn');
+    const takePhotoAfterBtn = document.getElementById('takePhotoAfterBtn');
+    const chooseGalleryAfterBtn = document.getElementById('chooseGalleryAfterBtn');
+
+    if (takePhotoBtn) {
+        takePhotoBtn.addEventListener('click', () => {
+            document.getElementById('tagImageInputCamera').click();
+        });
+    }
+
+    if (chooseGalleryBtn) {
+        chooseGalleryBtn.addEventListener('click', () => {
+            document.getElementById('tagImageInputGallery').click();
+        });
+    }
+
+    if (takePhotoAfterBtn) {
+        takePhotoAfterBtn.addEventListener('click', () => {
+            document.getElementById('tagImageInputAfterCamera').click();
+        });
+    }
+
+    if (chooseGalleryAfterBtn) {
+        chooseGalleryAfterBtn.addEventListener('click', () => {
+            document.getElementById('tagImageInputAfterGallery').click();
+        });
+    }
+
+    const tagImageInputCamera = document.getElementById('tagImageInputCamera');
+    const tagImageInputGallery = document.getElementById('tagImageInputGallery');
+    const tagImageInputAfterCamera = document.getElementById('tagImageInputAfterCamera');
+    const tagImageInputAfterGallery = document.getElementById('tagImageInputAfterGallery');
+
+    if (tagImageInputCamera) {
+        tagImageInputCamera.addEventListener('change', handleTagImageUpload);
+    }
+
+    if (tagImageInputGallery) {
+        tagImageInputGallery.addEventListener('change', handleTagImageUpload);
+    }
+
+    if (tagImageInputAfterCamera) {
+        tagImageInputAfterCamera.addEventListener('change', handleTagImageAfterUpload);
+    }
+
+    if (tagImageInputAfterGallery) {
+        tagImageInputAfterGallery.addEventListener('change', handleTagImageAfterUpload);
+    }
+
+    const toggleActiveTagsBtn = document.getElementById('toggleActiveTagsBtn');
+    const activeTagsFilterPanel = document.getElementById('activeTagsFilterPanel');
+    const activeTagsArrow = document.getElementById('activeTagsArrow');
+
+    if (toggleActiveTagsBtn && activeTagsFilterPanel && activeTagsArrow) {
+        toggleActiveTagsBtn.addEventListener('click', () => {
+            const isHidden = activeTagsFilterPanel.classList.toggle('hidden');
+            activeTagsArrow.textContent = isHidden ? '▶' : '▼';
+        });
+    }
+
+    const modalDeleteBtn = document.getElementById('deleteTagBtn');
+
+    if (modalDeleteBtn) {
+        modalDeleteBtn.addEventListener('click', () => {
+            const id = document.getElementById('tagId').value;
+
+            if (!id) return;
+
+            closeModal();
+            deleteTag(id);
+        });
+    }
+    
 }
+
+
 
 function renderApp() {
     renderMap();
@@ -671,29 +813,41 @@ function renderList() {
         const badgeTextColor = tag.status === 'Closed' ? '#15803d' : (tag.status === 'In Progress' ? '#a16207' : (tag.status === 'Need help' ? '#c2410c' : '#b91c1c'));
 
         item.innerHTML = `
-            <div class="flex justify-between items-start mb-2">
-                <div class="flex items-center gap-2 flex-wrap">
-                    <span class="w-3 h-3 rounded-full shrink-0" style="background-color: ${statusBgColor};"></span>
-                    <h3 class="font-semibold text-gray-800 text-sm truncate"title="${tag.zone}">Zone: ${tag.zone}</h3>
-                    <span class="px-2 py-0.5 rounded-full text-[5px] border whitespace-nowrap" style="background-color: ${badgeBgColor}; color: ${badgeTextColor}; border-color: ${statusBgColor}40;">
-                        ${tag.status}
-                    </span>
-                    ${tag.category ? `<span class="px-2 py-0.5 rounded-full text-[5px] font-normal bg-gray-100 text-gray-600 border border-gray-200 whitespace-nowrap truncate max-w-[100px]" title="${tag.category}">${tag.category.split(' (')[0]}</span>` : ''}
-                </div>
-                <div class="flex gap-1 shrink-0 ml-2">
-                    <button class="edit-btn p-1 text-gray-400 hover:text-blue-600 rounded" title="Edit">
-                        <i data-lucide="edit-2" class="w-4 h-4"></i>
-                    </button>
-                    <button class="delete-btn p-1 text-gray-400 hover:text-red-600 rounded" title="Delete">
-                        <i data-lucide="trash-2" class="w-4 h-4"></i>
-                    </button>
+            <div class="flex items-start gap-2">
+                <span class="w-3 h-3 rounded-full shrink-0 mt-1" style="background-color: ${statusBgColor};"></span>
+
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2">
+                        <h3 class="font-semibold text-gray-800 text-sm truncate flex-1 min-w-0" title="${tag.zone}">
+                            Zone: ${tag.zone}
+                        </h3>
+
+                        <span class="px-2 py-0.5 rounded-full text-xs border whitespace-nowrap shrink-0"
+                            style="background-color: ${badgeBgColor}; color: ${badgeTextColor}; border-color: ${statusBgColor}40;">
+                            ${tag.status}
+                        </span>
+
+                        <div class="flex gap-1 shrink-0">
+                            <button class="edit-btn p-1 text-gray-400 hover:text-blue-600 rounded" title="Edit">
+                                <i data-lucide="edit-2" class="w-4 h-4"></i>
+                            </button>
+                            <button class="delete-btn p-1 text-gray-400 hover:text-red-600 rounded" title="Delete">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="text-xs text-gray-500 font-medium mb-1 mt-2">
+                        <span class="text-gray-700 font-semibold">${tag.productionLine}</span>
+                    </div>
+
+                    <div class="text-sm text-gray-600 mb-2 mt-1 line-clamp-2" title="${tag.description}">
+                        ${tag.description}
+                    </div>
+
+                    ${tag.solution ? `<div class="text-xs text-gray-500 mt-2 bg-gray-50 p-2 rounded"><div class="line-clamp-2"><strong class="text-gray-700">Solved:</strong> ${tag.solution}</div></div>` : ''}
                 </div>
             </div>
-
-            <div class="text-xs text-gray-500 font-medium mb-1"><span class="text-gray-700 font-semibold">${tag.productionLine}</span></div>
-            
-            <div class="text-sm text-gray-600 mb-2 mt-1 line-clamp-2" title="${tag.description}">${tag.description}</div>
-            ${tag.solution ? `<div class="text-xs text-gray-500 mt-2 bg-gray-50 p-2 rounded"><div class="line-clamp-2"><strong class="text-gray-700">Solved:</strong> ${tag.solution}</div></div>` : ''}
         `;
 
         item.querySelector('.edit-btn').addEventListener('click', (e) => {
@@ -725,9 +879,23 @@ function getFilteredTags() {
 
         const inspectionMatch =
             filterInspectionType === 'All' ||
-            String(t.inspectionType || '5S') === filterInspectionType;
+            String(t.inspectionType || '') === filterInspectionType;
+        
+        const createdDate = new Date(t.createdAt || t.created || t.date || '');
 
-        return statusMatch && zoneMatch && inspectionMatch;
+        const hasValidDate = !isNaN(createdDate.getTime());
+
+        const monthMatch =
+            !filterMonth ||
+            !hasValidDate ||
+            createdDate.getMonth() + 1 === Number(filterMonth);
+
+        const yearMatch =
+            !filterYear ||
+            !hasValidDate ||
+            createdDate.getFullYear() === Number(filterYear);    
+
+        return statusMatch && zoneMatch && inspectionMatch && monthMatch && yearMatch;
     });
 }
 
@@ -772,63 +940,61 @@ async function handleMapUpload() {
 
 async function handleTagImageUpload(e) {
     const file = e.target.files[0];
-    if (file) {
-        // Show loading state
-        const placeholder = document.getElementById('uploadPlaceholder');
-        const preview = document.getElementById('imagePreview');
-        const originalText = placeholder.innerHTML;
-        placeholder.innerHTML = '<p class="text-sm text-gray-500">Uploading...</p>';
+    if (!file) return;
 
-        try {
-            const path = await uploadImage(file);
-            if (path) {
-                preview.src = path;
-                preview.classList.remove('hidden');
-                placeholder.classList.add('hidden');
-            } else {
-                // uploadImage already alerted
-                throw new Error('Upload failed (handled)');
-            }
-        } catch (err) {
-            console.error(err);
-            if (err.message !== 'Upload failed (handled)') {
-                alert('Failed to upload "Before" image. Please check file size and permissions.');
-            }
-        } finally {
-            placeholder.innerHTML = originalText;
-            e.target.value = '';
+    const placeholder = document.getElementById('uploadPlaceholder');
+    const preview = document.getElementById('imagePreview');
+
+    if (placeholder) {
+        placeholder.innerHTML = '<p class="text-sm text-gray-500">Uploading...</p>';
+    }
+
+    try {
+        const path = await uploadImage(file);
+
+        if (path && preview) {
+            preview.src = path;
+            preview.classList.remove('hidden');
         }
+
+        if (placeholder) {
+            placeholder.classList.add('hidden');
+        }
+    } catch (err) {
+        console.error(err);
+        alert('Failed to upload Before image.');
+    } finally {
+        e.target.value = '';
     }
 }
 
 async function handleTagImageAfterUpload(e) {
     const file = e.target.files[0];
-    if (file) {
-        // Show loading state
-        const placeholder = document.getElementById('uploadPlaceholderAfter');
-        const preview = document.getElementById('imagePreviewAfter');
-        const originalText = placeholder.innerHTML;
-        placeholder.innerHTML = '<p class="text-sm text-gray-500">Uploading...</p>';
+    if (!file) return;
 
-        try {
-            const path = await uploadImage(file);
-            if (path) {
-                preview.src = path;
-                preview.classList.remove('hidden');
-                placeholder.classList.add('hidden');
-            } else {
-                // uploadImage already alerted
-                throw new Error('Upload failed (handled)');
-            }
-        } catch (err) {
-            console.error(err);
-            if (err.message !== 'Upload failed (handled)') {
-                alert('Failed to upload "After" image. Please check file size and permissions.');
-            }
-        } finally {
-            placeholder.innerHTML = originalText;
-            e.target.value = '';
+    const placeholder = document.getElementById('uploadPlaceholderAfter');
+    const preview = document.getElementById('imageAfterPreview');
+
+    if (placeholder) {
+        placeholder.innerHTML = '<p class="text-sm text-gray-500">Uploading...</p>';
+    }
+
+    try {
+        const path = await uploadImage(file);
+
+        if (path && preview) {
+            preview.src = path;
+            preview.classList.remove('hidden');
         }
+
+        if (placeholder) {
+            placeholder.classList.add('hidden');
+        }
+    } catch (err) {
+        console.error(err);
+        alert('Failed to upload After image.');
+    } finally {
+        e.target.value = '';
     }
 }
 
@@ -867,10 +1033,13 @@ function openModal(tagData = null) {
         // We can check if it exists in tags array
         const exists = tags.some(t => t.id === tagData.id);
         const moveBtn = document.getElementById('moveBtn');
+        const deleteBtn = document.getElementById('deleteTagBtn');
         if (exists) {
             moveBtn.classList.remove('hidden');
+            deleteBtn.classList.remove('hidden');
         } else {
             moveBtn.classList.add('hidden');
+            deleteBtn.classList.add('hidden');
         }
 
         document.getElementById('tagId').value = tagData.id || '';
@@ -879,12 +1048,12 @@ function openModal(tagData = null) {
         document.getElementById('productionLine').value = tagData.productionLine || '';
         document.getElementById('description').value = tagData.description || '';
         document.getElementById('solution').value = tagData.solution || '';
-        document.getElementById('status').value = tagData.status || 'Open';
-        document.getElementById('category').value = tagData.category || '';
+        document.getElementById('status').value = tagData.status || 'Open';       
         document.getElementById('pic').value = tagData.pic || '';
         document.getElementById('inspectionType').value = tagData.inspectionType || '';
 
         updateInspectionForm();
+        document.getElementById('category').value = tagData.category || '';
 
         // Zone logic: use tag data, or last selected if new (handled in handleAddTagClick), or empty
         document.getElementById('zone').value = tagData.zone || '';
@@ -894,38 +1063,51 @@ function openModal(tagData = null) {
         const isClosed = (tagData.status || 'Open') === 'Closed';
         const solutionRequired = document.getElementById('solutionRequired');
         const photoAfterRequired = document.getElementById('photoAfterRequired');
+
         if (isClosed) {
-            solutionRequired.classList.remove('hidden');
-            photoAfterRequired.classList.remove('hidden');
+            if (solutionRequired) solutionRequired.classList.remove('hidden');
+            if (photoAfterRequired) photoAfterRequired.classList.remove('hidden');
         } else {
-            solutionRequired.classList.add('hidden');
-            photoAfterRequired.classList.add('hidden');
+            if (solutionRequired) solutionRequired.classList.add('hidden');
+            if (photoAfterRequired) photoAfterRequired.classList.add('hidden');
         }
 
         const preview = document.getElementById('imagePreview');
         const placeholder = document.getElementById('uploadPlaceholder');
 
-        if (tagData.image) {
-            preview.src = tagData.image;
-            preview.classList.remove('hidden');
-            placeholder.classList.add('hidden');
-        } else {
-            preview.src = '';
-            preview.classList.add('hidden');
-            placeholder.classList.remove('hidden');
+        if (preview && placeholder) {
+            if (tagData.image) {
+                preview.src = tagData.image;
+                preview.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+            } else {
+                preview.src = '';
+                preview.classList.add('hidden');
+                placeholder.innerHTML = `
+                    <div class="text-4xl mb-2">📷</div>
+                    <div>No Image</div>
+                `;
+                placeholder.classList.remove('hidden');
+            }
         }
 
-        const previewAfter = document.getElementById('imagePreviewAfter');
+        const previewAfter = document.getElementById('imageAfterPreview');
         const placeholderAfter = document.getElementById('uploadPlaceholderAfter');
 
-        if (tagData.imageAfter) {
-            previewAfter.src = tagData.imageAfter;
-            previewAfter.classList.remove('hidden');
-            placeholderAfter.classList.add('hidden');
-        } else {
-            previewAfter.src = '';
-            previewAfter.classList.add('hidden');
-            placeholderAfter.classList.remove('hidden');
+        if (previewAfter && placeholderAfter) {
+            if (tagData.imageAfter) {
+                previewAfter.src = tagData.imageAfter;
+                previewAfter.classList.remove('hidden');
+                placeholderAfter.classList.add('hidden');
+            } else {
+                previewAfter.src = '';
+                previewAfter.classList.add('hidden');
+                placeholderAfter.innerHTML = `
+                    <div class="text-4xl mb-2">📷</div>
+                    <div>No Image</div>
+                `;
+                placeholderAfter.classList.remove('hidden');
+            }
         }
     }
 
@@ -955,7 +1137,7 @@ function handleFormSubmit(e) {
     const preview = document.getElementById('imagePreview');
     const image = (!preview.classList.contains('hidden')) ? preview.src : null; // This might be full URL
 
-    const previewAfter = document.getElementById('imagePreviewAfter');
+    const previewAfter = document.getElementById('imageAfterPreview');
     const imageAfter = (!previewAfter.classList.contains('hidden')) ? previewAfter.src : null;
 
 
@@ -975,10 +1157,6 @@ function handleFormSubmit(e) {
     if (!status) {
         alert('Status is required.');
         return;
-    }
-    if (inspectionType === '5S' && !category) {
-    alert('Category is required.');
-    return;
     }
     if (!category) {
     alert('Category is required.');

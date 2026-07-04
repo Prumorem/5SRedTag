@@ -3,10 +3,10 @@ $configDir = 'config';
 $mapUrl = null;
 $factoryUrlParam = $_GET['factory'] ?? null;
 if (!$factoryUrlParam) {
-    // If not set via URL, we default to F10-11 or let JS override it. 
+    // If not set via URL, we default to 1st Floor or let JS override it. 
     // Wait, JS will fetch dynamically. Here we just want a preload hint if possible.
-    // It's safer to just default F15 for preload since JS will handle the real image.
-    $factoryUrlParam = 'F15';
+    // It's safer to just default 2nd Floor for preload since JS will handle the real image.
+    $factoryUrlParam = '1st Floor';
 }
 $factoryDir = $configDir . '/' . $factoryUrlParam;
 if (file_exists($factoryDir)) {
@@ -37,9 +37,7 @@ if (file_exists($factoryDir)) {
     <link rel="icon"
         href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23DC2626%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z%22/><path d=%22M7 7h.01%22/></svg>">
 
-    <?php if ($mapUrl): ?>
-        <link rel="preload" as="image" href="<?php echo htmlspecialchars($mapUrl); ?>" fetchpriority="high">
-    <?php endif; ?>
+
 
     <!-- Tailwind CSS -->
     <link href="./dist/output.css?v=<?= filemtime('./dist/output.css') ?>" rel="stylesheet">
@@ -177,9 +175,13 @@ if (file_exists($factoryDir)) {
 
         <!-- Filter Control -->
         <div class="p-2 bg-gray-100 text-xs font-semibold text-gray-500 uppercase tracking-wider pl-4 pr-2">
-            <div class="flex justify-between items-center mb-1">
+            <button id="toggleActiveTagsBtn" type="button"
+                class="w-full flex justify-between items-center mb-1 text-left">
                 <span>Active Tags (<span id="tagCount">0</span>)</span>
-            </div>
+                <span id="activeTagsArrow">▼</span>
+            </button>
+            <div id="activeTagsFilterPanel">
+            <!-- Factory -->
             <div class="flex items-center gap-2 bg-red-800/50 p-2 rounded-md border border-red-600/50 mt-1">
                 <label for="factorySelect"
                     class="text-xs font-semibold uppercase tracking-wider flex items-center gap-1">
@@ -233,13 +235,34 @@ if (file_exists($factoryDir)) {
                         <option value="All">All Zones</option>
                     </select>
                 </div>
+                <!-- Month -->
+                <div>
+                    <label class="block text-[10px] font-semibold text-gray-500 mb-1 uppercase">
+                        Month
+                    </label>
+                    <select id="filterMonth"
+                        class="w-full text-xs border border-gray-300 rounded px-2 py-1 bg-white">
+                    </select>
+                </div>
 
+                <!-- Year -->
+                <div>
+                    <label class="block text-[10px] font-semibold text-gray-500 mb-1 uppercase">
+                        Year
+                    </label>
+                    <select id="filterYear"
+                        class="w-full text-xs border border-gray-300 rounded px-2 py-1 bg-white">
+                    </select>
+                </div>
+            </div>
             </div>
             </div>
 
         <!-- Tag List -->
-        <div id="tagList" class="flex-1 overflow-y-auto p-4 space-y-3 w-full max-w-full">
+        <div id="activeTagsPanel" class="flex-1 overflow-hidden">
+            <div id="tagList" class="h-full overflow-y-auto p-4 space-y-3 w-full max-w-full">
             <!-- List items will be injected here -->
+            </div> 
         </div>
     </div>
 
@@ -273,9 +296,19 @@ if (file_exists($factoryDir)) {
         <div class="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] flex flex-col">
             <div class="sticky top-0 z-20 flex justify-between items-center p-4 border-b bg-white">
                 <h2 id="modalTitle" class="text-xl font-bold text-gray-800">New Red Tag</h2>
-                <button id="closeModalBtn" class="text-gray-500 hover:text-gray-700">
-                    <i data-lucide="x"></i>
-                </button>
+
+                <div class="flex items-center gap-2">
+                    <button id="deleteTagBtn" type="button"
+                        class="hidden text-gray-400 hover:text-red-600 p-2 rounded hover:bg-red-50"
+                        title="Delete Tag">
+                        <i data-lucide="trash-2"></i>
+                    </button>
+
+                    <button id="closeModalBtn" type="button"
+                        class="text-gray-500 hover:text-gray-700 p-2 rounded hover:bg-gray-100">
+                        <i data-lucide="x"></i>
+                    </button>
+                </div>
             </div>
 
             <form id="tagForm" class="flex-1 overflow-y-auto p-4 space-y-4">
@@ -290,6 +323,9 @@ if (file_exists($factoryDir)) {
                     </label>
                     <select id="inspectionType" required
                         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500">
+                        <option value="" disabled selected hidden>
+                            Select inspection type...
+                        </option>
                         
                         <option value="5S">5S</option>
                         <option value="Safety">Safety</option>
@@ -321,23 +357,34 @@ if (file_exists($factoryDir)) {
                 </div>
 
                 <!-- Photo (Before) Upload -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">
-                        Photo (Before) <span class="text-red-500">*</span>
-                    </label>
-                    <div class="flex items-center justify-center w-full">
-                        <label
-                            class="flex flex-col items-center justify-center w-full h-48 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 relative overflow-hidden">
-                            <img id="imagePreview" class="w-full h-full object-contain absolute hidden">
-                            <div id="uploadPlaceholder" class="flex flex-col items-center justify-center pt-5 pb-6">
-                                <i data-lucide="camera" class="w-8 h-8 mb-4 text-gray-500"></i>
-                                <p class="mb-2 text-sm text-gray-500"><span class="font-semibold">Click to upload</span>
-                                    or take photo</p>
-                            </div>
-                            <input type="file" id="tagImageInput" class="hidden" accept="image/*" capture="environment">
-                        </label>
-                    </div>
-                </div>
+               <div>
+                   <label class="block text-sm font-medium text-gray-700 mb-2">
+                       Before Image <span class="text-red-500">*</span>
+                   </label>
+
+                   <div class="flex gap-3 mb-3">
+                       <button type="button" id="takePhotoBtn"
+                           class="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg font-semibold">
+                           📷 Take Photo
+                       </button>
+
+                       <button type="button" id="chooseGalleryBtn"
+                           class="flex-1 px-4 py-3 bg-gray-100 border border-gray-300 rounded-lg font-semibold">
+                           🖼️ Upload
+                       </button>
+                   </div>
+
+                   <input type="file" id="tagImageInputCamera" accept="image/*" capture="environment" class="hidden">
+                   <input type="file" id="tagImageInputGallery" accept="image/*" class="hidden">
+
+                   <div class="border-2 border-dashed border-gray-300 rounded-lg h-48 flex items-center justify-center text-gray-500 bg-gray-50">
+                       <img id="imagePreview" class="hidden w-full h-full object-contain rounded-lg">
+                       <div id="uploadPlaceholder" class="text-center">
+                           <div class="text-4xl mb-2">📷</div>
+                           <div>No Image</div>
+                       </div>
+                   </div>
+               </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">
@@ -389,22 +436,32 @@ if (file_exists($factoryDir)) {
 
                 <!-- Photo (After) Upload -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">
-                        Photo (After) <span id="photoAfterRequired" class="text-red-500 hidden">*</span>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        After Image
+                        <span id="photoAfterRequired" class="text-red-500 hidden">*</span>
                     </label>
-                    <div class="flex items-center justify-center w-full">
-                        <label
-                            class="flex flex-col items-center justify-center w-full h-48 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 relative overflow-hidden">
-                            <img id="imagePreviewAfter" class="w-full h-full object-contain absolute hidden">
-                            <div id="uploadPlaceholderAfter"
-                                class="flex flex-col items-center justify-center pt-5 pb-6">
-                                <i data-lucide="camera" class="w-8 h-8 mb-4 text-gray-500"></i>
-                                <p class="mb-2 text-sm text-gray-500"><span class="font-semibold">Click to upload</span>
-                                    or take photo</p>
-                            </div>
-                            <input type="file" id="tagImageInputAfter" class="hidden" accept="image/*"
-                                capture="environment">
-                        </label>
+
+                    <div class="flex gap-3 mb-3">
+                        <button type="button" id="takePhotoAfterBtn"
+                            class="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg font-semibold">
+                            📷 Take Photo
+                        </button>
+
+                        <button type="button" id="chooseGalleryAfterBtn"
+                            class="flex-1 px-4 py-3 bg-gray-100 border border-gray-300 rounded-lg font-semibold">
+                            🖼️ Upload
+                        </button>
+                    </div>
+
+                    <input type="file" id="tagImageInputAfterCamera" accept="image/*" capture="environment" class="hidden">
+                    <input type="file" id="tagImageInputAfterGallery" accept="image/*" class="hidden">
+
+                    <div class="border-2 border-dashed border-gray-300 rounded-lg h-48 flex items-center justify-center text-gray-500 bg-gray-50">
+                        <img id="imageAfterPreview" class="hidden w-full h-full object-contain rounded-lg">
+                        <div id="uploadPlaceholderAfter" class="text-center">
+                            <div class="text-4xl mb-2">📷</div>
+                            <div>No Image</div>
+                        </div>
                     </div>
                 </div>
 
@@ -437,6 +494,9 @@ if (file_exists($factoryDir)) {
             </form>
         </div>
     </div>
+
+
+
 
     <!-- Password & Upload Modal -->
     <div id="passwordModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-[10000] hidden">
@@ -575,7 +635,7 @@ if (file_exists($factoryDir)) {
     <script src="libs/leaflet/leaflet.js" defer></script>
 
     <!-- App Logic -->
-    <script src="app.js?v=<?= filemtime('app.js') ?>" defer></script>
+    <script src="app.js?v=delete002" defer></script>
     <script defer>
         window.addEventListener('load', function () {
             if (typeof window.APP_VERSION === 'undefined' || window.APP_VERSION !== '2.0.0') {

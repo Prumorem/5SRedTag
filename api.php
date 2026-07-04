@@ -146,7 +146,7 @@ if ($action === 'load') {
         fclose($handle);
     }
 
-    $factory = $_GET['factory'] ?? 'F10-11';
+    $factory = $_GET['factory'] ?? '1st Floor';
     $factoryDir = $configDir . '/' . $factory;
     if (!file_exists($factoryDir))
         mkdir($factoryDir, 0777, true);
@@ -245,7 +245,7 @@ if ($action === 'save') {
                 } else {
                     // Migration: Normalize to 16 cols
                     // Current max cols is 16 (id..zone, created, deleted, updated, pic, cat, factory)
-                    if ($len < 16) {
+                    if ($len < 17) {
                         $newRow = array_slice($data, 0, 8); // 0-7 are standard
 
                         // 8 is imageAfter (if len >= 10) OR createdAt (if len == 9)
@@ -294,8 +294,8 @@ if ($action === 'save') {
                         $newRow[] = $updatedAt; // 12
                         $newRow[] = $pic;       // 13
                         $newRow[] = $category;  // 14
-                        $newRow[] = ($factoryCol === '') ? 'F10-11' : $factoryCol; // 15 Default old tags to F10-11 directly on save
-
+                        $newRow[] = ($factoryCol === '') ? '1st Floor' : $factoryCol; // 15 Default old tags to 1st Floor directly on save
+                        $newRow[] = '5S';
                         $tags[] = $newRow;
                     } else {
                         $tags[] = $data;
@@ -330,7 +330,7 @@ if ($action === 'save') {
                     '', // updatedAt (empty on creation)
                     $input['pic'] ?? '', // PIC
                     $input['category'] ?? '', // Category
-                    $input['factory'] ?? 'F10-11', // Factory
+                    $input['factory'] ?? '', // Factory
                     $input['inspectionType'] ?? '5S',
                 ];
             }
@@ -345,14 +345,14 @@ if ($action === 'save') {
             // Write all back
             fputcsv($handle, ['id', 'x', 'y', 'productionLine', 'description', 'solution', 'status', 'image', 'imageAfter', 'zone', 'createdAt', 'is_deleted', 'updatedAt', 'pic', 'category', 'factory', 'inspectionType']);
             foreach ($tags as $tag) {
-                // Ensure row has 16 elements
-                if (count($tag) < 18) {
+
                     // Should be handled by migration block above, but double check
-                    while (count($tag) < 18) {
-                        $tag[] = ($tag[0] == '') ? '' : 'F10-11'; // pad with F10-11 if missing factory
+                    while (count($tag) < 17) {
+                        $tag[] = ''; 
                     }
-                }
-                fputcsv($handle, $tag);
+                    $tag = array_slice($tag, 0, 17);
+                
+                    fputcsv($handle, $tag);
             }
 
             fflush($handle); // Flush output before releasing lock
@@ -435,7 +435,8 @@ if ($action === 'delete') {
                     $normalized[] = date('Y-m-d H:i:s'); // modifiedAt = now
                     $normalized[] = $pic; // 13
                     $normalized[] = $category; // 14
-                    $normalized[] = ($factoryCol === '') ? 'F10-11' : $factoryCol; // 15
+                    $normalized[] = ($factoryCol === '') ? '1st Floor' : $factoryCol;
+                    $normalized[] = '5S';
 
                     $tags[] = $normalized;
                     // Do NOT delete physical files!
@@ -488,7 +489,8 @@ if ($action === 'delete') {
                         $newRow[] = $modifiedAt;
                         $newRow[] = $pic;
                         $newRow[] = $category;
-                        $newRow[] = ($factoryCol === '') ? 'F10-11' : $factoryCol;
+                        $newRow[] = ($factoryCol === '') ? '1st Floor' : $factoryCol;
+                        $newRow[] = '5S';
 
                         $tags[] = $newRow;
                     } else {
@@ -504,9 +506,10 @@ if ($action === 'delete') {
             fputcsv($handle, ['id', 'x', 'y', 'productionLine', 'description', 'solution', 'status', 'image', 'imageAfter', 'zone', 'createdAt', 'is_deleted', 'updatedAt', 'pic', 'category', 'factory', 'inspectionType']);
             foreach ($tags as $tag) {
                 // Force to 16 cols if needed
-                while (count($tag) < 18) {
-                    $tag[] = 'F10-11';
+                while (count($tag) < 17) {
+                    $tag[] = '';
                 }
+                $tag = array_slice($tag, 0, 17);
                 fputcsv($handle, $tag);
             }
             fflush($handle);
@@ -750,7 +753,7 @@ if ($action === 'upload_floor_plan') {
         exit;
     }
 
-    $factory = $_POST['factory'] ?? 'F10-11';
+    $factory = $_POST['factory'] ?? '1st Floor';
     $factoryDir = $configDir . '/' . $factory;
     if (!file_exists($factoryDir))
         mkdir($factoryDir, 0777, true);

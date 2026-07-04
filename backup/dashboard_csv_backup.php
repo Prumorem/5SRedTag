@@ -1,33 +1,49 @@
 ﻿<?php
-date_default_timezone_set('Asia/Bangkok');
-
-function getDb() {
-    $db = new PDO("sqlite:" . __DIR__ . "/data/mt5200_patrol.db");
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    return $db;
-}
+// dashboard.php โ€” MT5200 Patrol Dashboard
+$dataDir = 'data';
+$csvFile = $dataDir . '/tags.csv';
 
 // Read tags directly from CSV for server-side rendering speed
 $tags = [];
-$db = getDb();
+if (file_exists($csvFile) && ($handle = fopen($csvFile, 'r')) !== false) {
+    if (flock($handle, LOCK_SH)) {
+        $headers = fgetcsv($handle);
+        while (($row = fgetcsv($handle)) !== false) {
+            $len = count($row);
+            if ($len < 8)
+                continue;
+            $is_deleted = ($len >= 12) ? trim((string) $row[11]) : '0';
+            if ($is_deleted !== '0' && $is_deleted !== '') {
+                continue;
+            }
 
-$stmt = $db->prepare("
-    SELECT *
-    FROM tags
-    WHERE is_deleted = 0
-    ORDER BY createdAt DESC
-");
-
-$stmt->execute();
-
-$tags = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $tags[] = [
+                'id' => $row[0],
+                'zone' => ($len >= 10) ? $row[9] : '',
+                'status' => $row[6],
+                'category' => ($len >= 15) ? $row[14] : '',
+                'pic' => ($len >= 14) ? $row[13] : '',
+                'factory' => ($len >= 16) ? $row[15] : '',
+                'inspectionType' => ($len >= 17) ? $row[16] : '5S',
+                'productionLine' => $row[3],
+                'image' => $row[7],
+                'imageAfter' => ($len >= 9) ? $row[8] : '',
+                'description' => $row[4],
+                'solution' => $row[5],
+                'createdAt' => ($len >= 11) ? $row[10] : '',
+                'updatedAt' => ($len >= 13) ? $row[12] : '',
+            ];
+        }
+        flock($handle, LOCK_UN);
+    }
+    fclose($handle);
+}
 
 // ---- Aggregate data ----
 $statusCounts = ['Open' => 0, 'In Progress' => 0, 'Need help' => 0, 'Closed' => 0];
 $zoneCounts = [];
 $categoryCounts = [];
 $dailyData = [];  // date => count
-$dailyStatusData = [];
 
 foreach ($tags as $t) {
     // Status
@@ -1314,7 +1330,29 @@ usort($recent, function ($a, $b) {
             const exportBtn = document.getElementById('exportCsvBtn');
             if (exportBtn) {
                 exportBtn.addEventListener('click', () => {
-                    window.open('api_sqlite.php?action=export', '_blank');
+                    if (!data.length) return alert('No data to export.');
+                    let csv = '\uFEFF'; // BOM for Excel Thai fonts
+                    const headers = ['ID', 'Zone', 'Line', 'Status', 'Category', 'PIC', 'Description', 'Solution', 'Photo (Before)', 'Photo (After)', 'Created', 'Updated'];
+                    csv += headers.join(',') + '\n';
+                    data.forEach((t, i) => {
+                        const row = [
+                            i + 1, getVal(t, 'zone'), getVal(t, 'line'), t.status, getVal(t, 'category'),
+                            getVal(t, 'pic'), t.description, t.solution, getVal(t, 'image'), getVal(t, 'imageAfter'), getVal(t, 'createdAt'), getVal(t, 'updatedAt')
+                        ].map(v => {
+                            let s = String(v || '').replace(/"/g, '""');
+                            return /[,\n"]/.test(s) ? `"${s}"` : s;
+                        });
+                        csv += row.join(',') + '\n';
+                    });
+                    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `5S_RedTags_Export_${new Date().toISOString().slice(0, 10)}.csv`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
                 });
             }
 
