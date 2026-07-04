@@ -635,7 +635,7 @@ if (file_exists($factoryDir)) {
     <script src="libs/leaflet/leaflet.js" defer></script>
 
     <!-- App Logic -->
-    <script src="app.js?v=delete002" defer></script>
+    <script src="app.js?v=upload001" defer></script>
     <script defer>
         window.addEventListener('load', function () {
             if (typeof window.APP_VERSION === 'undefined' || window.APP_VERSION !== '2.0.0') {

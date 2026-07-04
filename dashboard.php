@@ -2,7 +2,7 @@
 date_default_timezone_set('Asia/Bangkok');
 
 function getDb() {
-    $db = new PDO("sqlite:" . __DIR__ . "/data/mt5200_patrol.db");
+    $db = new PDO("sqlite:" . __DIR__ . "/data/MT5200_Patrol.db");
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     return $db;
 }

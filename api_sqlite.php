@@ -6,7 +6,7 @@ header('Content-Type: application/json; charset=utf-8');
 $action = $_GET['action'] ?? '';
 
 function getDb() {
-    $db = new PDO("sqlite:" . __DIR__ . "/data/mt5200_patrol.db");
+    $db = new PDO("sqlite:" . __DIR__ . "/data/MT5200_Patrol.db");
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     return $db;
 }
@@ -248,7 +248,7 @@ if ($action === 'export') {
 }
 if ($action === 'backup') {
 
-    $dbFile = __DIR__ . "/data/mt5200_patrol.db";
+    $dbFile = __DIR__ . "/data/MT5200_Patrol.db";
 
     if (!file_exists($dbFile)) {
         jsonResponse([

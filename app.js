@@ -442,7 +442,7 @@ async function uploadImage(file) {
     formData.append('file', file);
 
     try {
-        const response = await fetch('api.php?action=upload', {
+        const response = await fetch('api_upload.php?action=upload', {
             method: 'POST',
             body: formData
         });
@@ -911,7 +911,7 @@ async function handleMapUpload() {
             formData.append('file', file);
             formData.append('factory', currentFactory);
 
-            const response = await fetch('api.php?action=upload_floor_plan', {
+            const response = await fetch('api_upload.php?action=upload_floor_plan', {
                 method: 'POST',
                 body: formData
             });
@@ -1238,7 +1238,7 @@ function handleMoveTagClick(latlng) {
 
 async function checkPassword(input) {
     try {
-        const response = await fetch('api.php?action=check_password', {
+        const response = await fetch('api_upload.php?action=check_password', {
             method: 'POST',
             body: JSON.stringify({ password: input })
         });
